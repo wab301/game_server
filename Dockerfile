@@ -32,9 +32,8 @@ WORKDIR /opt/
 RUN apt-get install -yy libxml2-dev && wget http://cn2.php.net/distributions/php-5.6.30.tar.gz
 RUN tar -zxf php-5.6.30.tar.gz && rm -rf php-5.6.30.tar.gz
 WORKDIR /opt/php-5.6.30/ 
-RUN ./configure --prefix=/usr/local/php-5.5.32 --with-mysqli=/usr/bin/mysql_config --enable-sockets --enable-mbstring --enable-zip 
+RUN ./configure --prefix=/usr/local/php-5.6.30 --with-mysqli=/usr/bin/mysql_config --enable-sockets --enable-mbstring --enable-zip 
 RUN make && make install
 RUN ln -sf /usr/local/php-5.6.30 /usr/local/php && ln -sf /usr/local/php/bin/php /usr/local/bin
 WORKDIR /opt
 RUN rm -rf /opt/php-5.6.30
-CMD "/"
