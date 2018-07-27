@@ -1,40 +1,31 @@
-#This is a image for game_server
 FROM ubuntu:16.04
-MAINTAINER Abin Wang <wangabin0910@gmail.com>
+LABEL maintainer="RapidClash Docker Maintainers <wangabin@xmfunny.com>"
 
-RUN apt-get update 
-RUN apt-get install -y wget make gcc openssh-server libmysqlclient-dev psmisc screen expect git vim subversion-tools 
+RUN apt-get update && apt-get install -y tzdata \
+    -y php \
+    -y php-mysqli \
+    -y php-zip \
+    -y curl \
+    -y sudo \
+    -y wget make gcc openssh-server libmysqlclient-dev psmisc 
+
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN sed -ie 's/short_open_tag = Off/short_open_tag = On/g' /etc/php/7.0/cli/php.ini
+
+RUN apt-get install -y libreadline-dev libncurses-dev
 
 # install go
 WORKDIR /usr/local/
-RUN wget https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz
-RUN tar -zxf go1.8.1.linux-amd64.tar.gz && rm -r go1.8.1.linux-amd64.tar.gz
-RUN ln -sf /usr/local/go/bin/* /usr/local/bin/
-ENV GOPATH /usr/local/go
+RUN curl -R -O https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz && tar -zxf go1.10.3.linux-amd64.tar.gz \
+    && rm -r go1.10.3.linux-amd64.tar.gz && ln -sf /usr/local/go/bin/* /usr/local/bin/
 
-# intall luajit
-RUN apt-get install -y libreadline-dev libncurses-dev
-WORKDIR /opt/
-RUN wget http://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz
-RUN tar -zxf LuaJIT-2.1.0-beta3.tar.gz && rm -rf LuaJIT-2.1.0-beta3.tar.gz
-WORKDIR /opt/LuaJIT-2.1.0-beta3/
-RUN make PREFIX=/usr/local/LuaJIT-2.1.0-beta3 && make install PREFIX=/usr/local/LuaJIT-2.1.0-beta3 
-WORKDIR /usr/local/LuaJIT-2.1.0-beta3/bin/
-RUN ln -sf luajit-2.1.0-beta3 luajit
-RUN ln -sf /usr/local/LuaJIT-2.1.0-beta3 /usr/local/luajit 
-RUN ln -s /usr/local/luajit/lib/libluajit-5.1.so.2 /usr/lib/libluajit-5.1.so.2
-RUN ln -sf /usr/local/luajit/bin/luajit /usr/local/bin/luajit
-RUN ln -sf /usr/local/luajit/share/luajit-2.0.4 /usr/local/share/luajit-2.0.4
-RUN rm -rf /opt/LuaJIT-2.1.0-beta3
+# install lua
+RUN curl -R -O http://www.lua.org/ftp/lua-5.3.1.tar.gz && tar -zxvf lua-5.3.1.tar.gz && rm lua-5.3.1.tar.gz \
+    && cd /usr/local/lua-5.3.1 && make linux install INSTALL_TOP=/usr/local/lua-5.3.1 && ln -sf /usr/local/lua-5.3.1 /usr/local/lua
 
-# install php
-WORKDIR /opt/
-RUN apt-get install -yy libxml2-dev && wget http://cn2.php.net/distributions/php-5.6.30.tar.gz
-RUN tar -zxf php-5.6.30.tar.gz && rm -rf php-5.6.30.tar.gz
-WORKDIR /opt/php-5.6.30/ 
-RUN ./configure --prefix=/usr/local/php-5.6.30 --with-mysqli=/usr/bin/mysql_config --enable-sockets --enable-mbstring --enable-zip 
-RUN make && make install
-RUN ln -sf /usr/local/php-5.6.30 /usr/local/php && ln -sf /usr/local/php/bin/php /usr/local/bin
-WORKDIR /opt
-RUN rm -rf /opt/php-5.6.30
-RUN /etc/init.d/ssh start
+# install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - && apt-get install -y git g++ nodejs
+RUN npm install npm@latest -g && npm install webpack -g
+
+WORKDIR /data
