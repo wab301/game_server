@@ -28,4 +28,6 @@ RUN curl -R -O http://www.lua.org/ftp/lua-5.3.1.tar.gz && tar -zxvf lua-5.3.1.ta
 RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - && apt-get install -y git g++ nodejs
 RUN npm install npm@latest -g && npm install webpack -g
 
+RUN apt-get install -y dos2unix
+
 WORKDIR /data
